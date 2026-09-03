@@ -1,29 +1,34 @@
 # Build Stage
-FROM maven:3.9-eclipse-temurin-17-alpine AS build
+FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
 WORKDIR /app
+
+# Copy pom.xml and source files
 COPY pom.xml .
-# Cache dependencies
-RUN mvn dependency:go-offline -B
 COPY src ./src
+
+# Package the application
 RUN mvn clean package -DskipTests
 
 # Runtime Stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Create non-root user for security
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Setup application directory and permissions for embedded H2 database
+RUN mkdir -p /app/data && \
+    addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    chown -R appuser:appgroup /app
+
 USER appuser
 
-# Copy built JAR from build stage
-COPY --from=build /app/target/life-companion-0.0.1-SNAPSHOT.jar app.jar
+# Copy the fat JAR
+COPY --from=build --chown=appuser:appgroup /app/target/life-companion-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose default port
-EXPOSE 8080
+# Expose port
+EXPOSE 8080 10000
 
-# Environment variables
-ENV PORT=8080
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
+# Optimized memory flags for Render 512MB free tier
+ENV PORT=10000
+ENV JAVA_OPTS="-Xmx384m -Xss512k -XX:+UseSerialGC -Djava.security.egd=file:/dev/./urandom"
 
-# Run Application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+# Start the Spring Boot application
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.port=${PORT:-8080} -jar app.jar"]

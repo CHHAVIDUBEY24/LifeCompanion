@@ -62,11 +62,6 @@ To enable live AI inference with Google's Gemini models, set the `GEMINI_API_KEY
 gemini.api.key=YOUR_GEMINI_API_KEY
 gemini.api.model=gemini-2.5-flash
 ```
-*Note: If no API key is provided, the built-in empathetic response engine functions completely offline seamlessly.*
-
-### Database
-- **H2 Database**: Persistent file database stored under `./data/lifecompaniondb`.
-- **H2 Web Console**: Accessible at `http://localhost:8080/h2-console` (JDBC URL: `jdbc:h2:file:./data/lifecompaniondb`, User: `sa`, Password: empty).
 
 ---
 

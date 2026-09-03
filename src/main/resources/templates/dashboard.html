@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html}">
+<head><title>Dashboard</title></head>
+<body>
+<div th:fragment="main-content" class="space-y-6">
+
+    <!-- Welcome & Daily Affirmation Banner -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-800 text-white p-6 sm:p-8 shadow-lg">
+        <div class="relative z-10 max-w-2xl">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-700/60 text-emerald-100 border border-emerald-500/30 mb-3">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Daily Sanctuary
+            </span>
+            <h1 class="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
+                Welcome back. You don't have to carry everything all at once.
+            </h1>
+            <p class="mt-3 text-sm sm:text-base text-emerald-100/90 leading-relaxed font-light serif-font italic">
+                “<span th:text="${stats.dailyAffirmation}">I am doing the best I can with the energy I have today.</span>”
+            </p>
+
+            <div class="mt-6 flex flex-wrap gap-3">
+                <a href="/companion" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-slate-800 font-semibold text-xs shadow-md hover:bg-emerald-50 transition">
+                    <i data-lucide="message-square" class="w-4 h-4 text-emerald-600"></i> Talk to AI Companion
+                </a>
+                <a href="/grounding" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-700/60 text-white border border-emerald-500/30 font-medium text-xs hover:bg-emerald-600/70 transition">
+                    <i data-lucide="wind" class="w-4 h-4 text-teal-200"></i> 4-4-4-4 Box Breathing
+                </a>
+            </div>
+        </div>
+        <div class="absolute -right-8 -bottom-10 opacity-10 pointer-events-none">
+            <i data-lucide="flower" class="w-72 h-72 text-white"></i>
+        </div>
+    </div>
+
+    <!-- Overview Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Card 1: Today's Emotional State -->
+        <div class="glass-card p-6 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                        <i data-lucide="smile" class="w-4 h-4 text-emerald-600"></i> Emotional Check-in
+                    </h2>
+                    <a href="/reflections" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Check In &rarr;</a>
+                </div>
+
+                <div th:if="${stats.latestMood != null}" class="mt-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-lg">
+                            <span th:text="${stats.latestMood.moodScore}">3</span>/5
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-800 text-base" th:text="${stats.latestMood.primaryEmotion}">Calm</div>
+                            <div class="text-xs text-slate-500" th:text="${#temporals.format(stats.latestMood.timestamp, 'MMM dd, hh:mm a')}">Sep 04</div>
+                        </div>
+                    </div>
+                    <p class="mt-3 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 italic" th:text="${stats.latestMood.gentleInsight}">
+                        Honoring your energy is an act of kindness.
+                    </p>
+                </div>
+
+                <div th:if="${stats.latestMood == null}" class="mt-6 text-center py-4">
+                    <p class="text-sm text-slate-500">No check-in recorded yet today.</p>
+                    <a href="/reflections" class="mt-3 inline-block text-xs bg-emerald-600 text-white font-medium px-4 py-2 rounded-xl shadow-sm hover:bg-emerald-700 transition">
+                        Take 1-Minute Check-in
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>7-Day Average Mood</span>
+                <span class="font-bold text-slate-700" th:text="${#numbers.formatDecimal(stats.averageMoodThisWeek, 1, 1)} + ' / 5.0'">3.5 / 5.0</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Today's Gentle Micro-Quests -->
+        <div class="glass-card p-6 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                        <i data-lucide="compass" class="w-4 h-4 text-emerald-600"></i> Gentle Quests
+                    </h2>
+                    <a href="/activities" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">View All &rarr;</a>
+                </div>
+
+                <div class="mt-4 space-y-2.5">
+                    <div th:each="act, iter : ${stats.todayActivities}" th:if="${iter.index < 3}"
+                         th:id="'activity-card-' + ${act.id}"
+                         class="p-3 rounded-2xl border border-slate-100 flex items-center justify-between transition"
+                         th:classappend="${act.completed} ? 'bg-emerald-50/70 border-emerald-200' : 'bg-white hover:bg-slate-50'">
+                        <div class="flex items-center gap-3">
+                            <button class="activity-toggle-btn text-slate-400 hover:text-emerald-600 transition" th:data-id="${act.id}">
+                                <i th:if="${act.completed}" data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
+                                <i th:if="${!act.completed}" data-lucide="circle" class="w-5 h-5 text-slate-400"></i>
+                            </button>
+                            <div>
+                                <h4 class="text-xs font-semibold text-slate-800" th:text="${act.title}">Drink warm water</h4>
+                                <span class="text-[10px] text-slate-400" th:text="${act.durationMinutes} + ' mins • ' + ${act.category}">2 mins</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Completed Today</span>
+                <span class="font-bold text-emerald-700" th:text="${stats.completedActivitiesCount} + ' micro-steps'">2 micro-steps</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Reflection Prompt of the Day -->
+        <div class="glass-card p-6 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                        <i data-lucide="book-open" class="w-4 h-4 text-emerald-600"></i> Daily Reflection
+                    </h2>
+                </div>
+
+                <div class="mt-4">
+                    <p class="text-sm font-serif text-slate-800 leading-relaxed italic" th:text="${stats.dailyPrompt}">
+                        What is taking up the most emotional space in your mind today?
+                    </p>
+                    <p class="mt-2 text-xs text-slate-500">
+                        Writing without self-critique helps release unexpressed cognitive load.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100">
+                <a href="/reflections" class="block w-full text-center py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold transition">
+                    Journal on this Prompt
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Active Reconnection Step Section -->
+    <div class="glass-card p-6 sm:p-7">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+            <div>
+                <h3 class="font-serif font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <i data-lucide="heart" class="w-5 h-5 text-rose-500"></i> Gradual Reconnection Roadmap
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Gentle, zero-pressure steps towards the people and spaces that nourish you.</p>
+            </div>
+            <a href="/reconnect" class="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1">
+                Manage Circles &amp; Gratitude <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div th:each="g : ${stats.activeGoals}" class="p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-200 transition">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-rose-50 text-rose-700" th:text="${g.category}">FRIEND</span>
+                    <span class="text-[11px] text-slate-400">Comfort Level: <strong class="text-slate-600" th:text="${g.comfortLevel}">1</strong>/3</span>
+                </div>
+                <h4 class="mt-2 font-bold text-sm text-slate-800" th:text="${g.title}">Say a warm hello</h4>
+                <p class="mt-1 text-xs text-slate-600" th:text="${g.smallStep}">Send a simple message with no pressure</p>
+                <div class="mt-3 text-[11px] text-slate-500 font-medium">Target: <span class="text-slate-700" th:text="${g.targetName}">Close friend</span></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html}">
+<head><title>Gentle Quests</title></head>
+<body>
+<div th:fragment="main-content" class="space-y-6">
+
+    <!-- Header -->
+    <div class="glass-card p-6 bg-gradient-to-br from-white to-emerald-50/40">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="font-serif font-bold text-2xl text-slate-800">Achievable Micro-Quests</h1>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Tiny, compassionate actions to gently anchor your day. No streaks to break, only gentle progress.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="bg-white px-4 py-2.5 rounded-2xl border border-slate-200 text-xs text-slate-600 shadow-2xs">
+                    Completed: <strong class="text-emerald-700 font-bold" th:text="${completedCount}">0</strong> / <span th:text="${totalCount}">5</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid: Quests List + Add Custom Quest -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Quests Stream (Left 8 cols) -->
+        <div class="lg:col-span-8 space-y-4">
+
+            <div th:each="act : ${todayActivities}"
+                 th:id="'activity-card-' + ${act.id}"
+                 class="glass-card p-5 border transition flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                 th:classappend="${act.completed} ? 'bg-emerald-50/60 border-emerald-200' : 'bg-white'">
+                <div class="flex items-start gap-4">
+                    <button class="activity-toggle-btn mt-1 text-slate-400 hover:text-emerald-600 transition flex-shrink-0" th:data-id="${act.id}">
+                        <i th:if="${act.completed}" data-lucide="check-circle-2" class="w-6 h-6 text-emerald-600"></i>
+                        <i th:if="${!act.completed}" data-lucide="circle" class="w-6 h-6 text-slate-300"></i>
+                    </button>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-sm text-slate-800" th:text="${act.title}">Drink warm water</h3>
+                            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md"
+                                  th:classappend="${act.category == 'SELF_CARE'} ? 'badge-self-care' : (${act.category == 'GROUNDING'} ? 'badge-grounding' : (${act.category == 'SOCIAL_WARMTH'} ? 'badge-social' : (${act.category == 'MOVEMENT'} ? 'badge-movement' : 'badge-creativity')))"
+                                  th:text="${act.category}">SELF_CARE</span>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-1 leading-relaxed" th:text="${act.description}">Description</p>
+                        <span class="inline-block mt-2 text-[11px] text-slate-400 font-medium">
+                            ⏱️ Takes ~<span th:text="${act.durationMinutes}">2</span> minutes
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Add Custom Quest Form (Right 4 cols) -->
+        <div class="lg:col-span-4 glass-card p-6">
+            <h2 class="font-serif font-bold text-base text-slate-800 flex items-center gap-2 mb-3">
+                <i data-lucide="plus" class="w-4 h-4 text-emerald-600"></i> Add Your Micro-Step
+            </h2>
+            <p class="text-xs text-slate-500 mb-4">Craft a small, comfortable act of kindness for yourself today.</p>
+
+            <form id="customQuestForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Quest Title</label>
+                    <input type="text" id="questTitle" placeholder="e.g. Listen to 1 soothing song" required
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Gentle Description</label>
+                    <textarea id="questDesc" rows="2" placeholder="Put on headphones, close eyes, and breathe with the melody..."
+                              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+                    <select id="questCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                        <option value="SELF_CARE">Self-Care</option>
+                        <option value="GROUNDING">Grounding &amp; Peace</option>
+                        <option value="SOCIAL_WARMTH">Social Warmth</option>
+                        <option value="MOVEMENT">Gentle Movement</option>
+                        <option value="CREATIVITY">Creativity &amp; Play</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Approximate Duration (Minutes)</label>
+                    <input type="number" id="questDuration" min="1" max="15" value="3"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                </div>
+
+                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i> Add to Today's Quests
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

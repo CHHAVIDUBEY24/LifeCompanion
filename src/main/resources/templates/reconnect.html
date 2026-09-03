@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html}">
+<head><title>Gradual Reconnection</title></head>
+<body>
+<div th:fragment="main-content" class="space-y-6">
+
+    <!-- Header -->
+    <div class="glass-card p-6 bg-gradient-to-br from-white to-emerald-50/40">
+        <h1 class="font-serif font-bold text-2xl text-slate-800">Gradual Reconnection &amp; Gratitude Vault</h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Reconnecting with people, nature, and simple joys at your own comfortable pace—without guilt or urgency.</p>
+    </div>
+
+    <!-- 2 Column Layout: Reconnection Circles (Left) & Gratitude Vault (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Reconnection Goals (Left 6 cols) -->
+        <div class="lg:col-span-6 space-y-4">
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-serif font-bold text-base text-slate-800 flex items-center gap-2">
+                        <i data-lucide="users" class="w-5 h-5 text-emerald-600"></i> Meaningful Outreach Steps
+                    </h2>
+                </div>
+
+                <!-- Goals List -->
+                <div class="space-y-3">
+                    <div th:each="goal : ${goals}" class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800" th:text="${goal.category}">FRIEND</span>
+                            <span class="text-[11px] text-slate-400">Comfort Level: <strong class="text-slate-700" th:text="${goal.comfortLevel}">1</strong>/3</span>
+                        </div>
+                        <h3 class="font-bold text-sm text-slate-800 mt-2" th:text="${goal.title}">Say a warm hello</h3>
+                        <p class="text-xs text-slate-600 mt-1" th:text="${goal.smallStep}">Send a simple message with no pressure</p>
+                        <div class="mt-3 flex items-center justify-between text-xs pt-2 border-t border-slate-100">
+                            <span class="text-slate-500">Target: <strong class="text-slate-700" th:text="${goal.targetName}">Friend</strong></span>
+                            <button th:onclick="'fetch(\'/api/reconnect/goals/' + ${goal.id} + '/status\', {method:\'POST\', headers:{\'Content-Type\':\'application/json\'}, body:JSON.stringify({status:\'COMPLETED\'})}).then(()=>window.location.reload())'"
+                                    class="text-xs text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i> Mark Done
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Step Form -->
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Add Low-Pressure Outreach Goal</h3>
+                    <form id="newGoalForm" class="space-y-3">
+                        <input type="text" id="goalTitle" placeholder="Title (e.g. Say hello to neighbor)" required
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500/30">
+                        <input type="text" id="goalTarget" placeholder="Target Person or Place (e.g. Grandma, local cafe)" required
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500/30">
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="goalCategory" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                                <option value="FRIEND">Friend</option>
+                                <option value="FAMILY">Family</option>
+                                <option value="COMMUNITY">Community / Space</option>
+                                <option value="HOBBY">Shared Hobby</option>
+                            </select>
+                            <select id="goalComfort" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                                <option value="1">Comfort: Very Low (Easy)</option>
+                                <option value="2">Comfort: Gentle Stretch</option>
+                                <option value="3">Comfort: Moderate</option>
+                            </select>
+                        </div>
+                        <textarea id="goalStep" rows="2" placeholder="The single tiny first action you'll take..."
+                                  class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500/30"></textarea>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add Outreach Goal
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gratitude & Comfort Vault (Right 6 cols) -->
+        <div class="lg:col-span-6 space-y-4">
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-serif font-bold text-base text-slate-800 flex items-center gap-2">
+                        <i data-lucide="heart-handshake" class="w-5 h-5 text-rose-500"></i> Gratitude &amp; Comfort Vault
+                    </h2>
+                </div>
+
+                <!-- Gratitude Items Grid -->
+                <div class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                    <div th:each="item : ${gratitudeItems}" class="p-4 rounded-2xl bg-white border border-slate-200/80 flex items-start justify-between gap-3 shadow-2xs">
+                        <div>
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400" th:text="${item.category}">SIMPLE_PLEASURE</span>
+                            <p class="font-serif text-xs sm:text-sm text-slate-700 italic mt-1 leading-relaxed" th:text="'“' + ${item.content} + '”'">Gratitude text</p>
+                        </div>
+                        <button class="gratitude-fav-btn text-slate-300 hover:text-amber-500 transition"
+                                th:data-id="${item.id}"
+                                th:classappend="${item.favorite} ? 'text-amber-500' : 'text-slate-300'">
+                            <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Gratitude Form -->
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Deposit a Comfort / Gratitude Spark</h3>
+                    <form id="newGratitudeForm" class="space-y-3">
+                        <input type="text" id="gratitudeContent" placeholder="e.g. The sound of rain, warm morning sunlight, a kind word..." required
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500/30">
+                        <select id="gratitudeCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                            <option value="SIMPLE_PLEASURE">Simple Sensory Pleasure</option>
+                            <option value="KIND_WORD">Kind Word / Message</option>
+                            <option value="NATURE">Nature &amp; Outdoors</option>
+                            <option value="COMFORT_OBJECT">Comfort Object / Space</option>
+                            <option value="MEMORY">Cherished Memory</option>
+                        </select>
+                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                            <i data-lucide="bookmark" class="w-4 h-4 text-emerald-400"></i> Save to Vault
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>
